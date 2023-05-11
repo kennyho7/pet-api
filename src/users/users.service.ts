@@ -6,6 +6,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { AccessTokenDto } from './dto/access-token-dto';
 
 const saltRounds = 10;
 @Injectable()
@@ -13,8 +15,9 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private jwtService: JwtService,
   ) {}
-  async auth(authUserDto: AuthUserDto): Promise<boolean> {
+  async login(authUserDto: AuthUserDto): Promise<AccessTokenDto> {
     const user = await this.usersRepository.findOne({
       where: {
         username: authUserDto.username,
@@ -30,10 +33,14 @@ export class UsersService {
       throw new BadRequestException('password wrong');
     }
 
-    return true;
+    const payload = { username: user.username, sub: user.id };
+
+    return {
+      accessToken: await this.jwtService.signAsync(payload),
+    };
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async register(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(
       createUserDto.password,
       saltRounds,

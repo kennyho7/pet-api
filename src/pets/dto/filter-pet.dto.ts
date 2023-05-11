@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger/dist/decorators';
 
-export class CreatePetDto {
+export class FilterPetDto {
   @ApiProperty()
-  name: string;
+  breed?: string;
   @ApiProperty()
-  age: number;
+  location?: string;
   @ApiProperty()
-  breed: string;
+  minAge?: number;
   @ApiProperty()
-  location: string;
+  maxAge?: number;
 }
